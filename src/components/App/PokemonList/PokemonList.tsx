@@ -10,68 +10,101 @@ import {
   Paper,
   TablePagination
 } from '@mui/material';
+import {
+  useQuery,
+  keepPreviousData,
+  useQueryClient
+} from '@tanstack/react-query';
 import TablePaginationCentered from 'components/TablePaginationCentered/TablePaginationCentered';
+import axios, { AxiosResponse } from 'axios';
+import pokemonListQuery from './pokemonListQuery';
+
+const endpoint = 'https://beta.pokeapi.co/graphql/v1beta';
 
 export interface PokemonListProps {
   rowsPerPage?: number;
 }
 
-export interface PokemonListItem {
-  name: string;
-  url: string;
+export interface PokemonAbilityEffect {
+  language_id: number;
+  effect: string;
 }
 
-// Get the Pokemon ID that will be used for the pokemon details page
-// API request.
-// TODO: Revisit as this still feels clunky, maybe just regex option
-const pokemonIdFromUrl = (url: string): string => {
-  // In case the API removes trailing slashes at some point:
-  const noSlashUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-  return noSlashUrl.split('/').pop() ?? 'UNKNOWN';
-};
+// TODO: Maybe there's a way to flatten this in the query itself?
+export interface PokemonAbility {
+  id: number;
+  pokemon_v2_ability: {
+    name: string;
+  };
+}
+
+// TODO: I wonder if I can rename properties in graphql query?
+// pokemon_v2_pokemonabilities -> abilities
+export interface PokemonListItem {
+  id: number;
+  name: string;
+  pokemon_v2_pokemonabilities: PokemonAbility[];
+}
 
 const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
-  const mockData: PokemonListItem[] = [
-    { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
-    {
-      'name': 'ivysaur',
-      'url': 'https://pokeapi.co/api/v2/pokemon/2/'
-    },
-    {
-      'name': 'venusaur',
-      'url': 'https://pokeapi.co/api/v2/pokemon/3/'
-    },
-    {
-      'name': 'charmander',
-      'url': 'https://pokeapi.co/api/v2/pokemon/4/'
-    },
-    {
-      'name': 'charmeleon',
-      'url': 'https://pokeapi.co/api/v2/pokemon/5/'
-    },
-    {
-      'name': 'charizard',
-      'url': 'https://pokeapi.co/api/v2/pokemon/6/'
-    },
-    {
-      'name': 'squirtle',
-      'url': 'https://pokeapi.co/api/v2/pokemon/7/'
-    },
-    {
-      'name': 'wartortle',
-      'url': 'https://pokeapi.co/api/v2/pokemon/8/'
-    },
-    {
-      'name': 'blastoise',
-      'url': 'https://pokeapi.co/api/v2/pokemon/9/'
-    },
-    {
-      'name': 'caterpie',
-      'url': 'https://pokeapi.co/api/v2/pokemon/10/'
-    }
-  ];
-
   const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
+
+  // TODO: No any?
+  const handleChangePage = (event: any | null, newPage: number) => {
+    setPage(newPage);
+  };
+
+  // TODO: Error handling
+  // TODO: incoming data types
+  // Get a page of pokemon
+  // I really wanted to name this, `catchPokemon`...
+  const fetchPokemon = async (
+    newPage: number,
+    limit: number,
+    query: string
+  ): Promise<AxiosResponse<any, any>> => {
+    const response = await axios.post(endpoint, {
+      query,
+      variables: {
+        limit,
+        offset: newPage * limit,
+        orderBy: [{ id: 'asc' }]
+      }
+    });
+
+    return response.data;
+  };
+
+  // much thanks:
+  // https://tanstack.com/query/latest/docs/framework/react/examples/pagination?from=reactQueryV3
+  const { data, error, isFetching, isPlaceholderData } = useQuery({
+    queryKey: ['pokemon', page, rowsPerPage],
+    placeholderData: keepPreviousData,
+    staleTime: 500000,
+    queryFn: async () => {
+      const response = await fetchPokemon(page, rowsPerPage, pokemonListQuery);
+      return response.data;
+    }
+  });
+
+  // Prefetch the next page!
+  React.useEffect(() => {
+    if (!isPlaceholderData && data?.hasMore) {
+      queryClient.prefetchQuery({
+        queryKey: ['pokemon', page + 1],
+        queryFn: () => fetchPokemon(page + 1, rowsPerPage, pokemonListQuery)
+      });
+    }
+  }, [data, isPlaceholderData, page, queryClient]);
+
+  // TODO: Make better.
+  // TODO: preloading shadows might be nice here instead
+  if (isFetching) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  const pokemonData = data.pokemon_v2_pokemon as PokemonListItem[];
+  const { count } = data.pokemon_v2_pokemon_aggregate.aggregate;
 
   return (
     <TableContainer component={Paper}>
@@ -83,26 +116,24 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
         </TableHead>
 
         <TableBody>
-          {mockData
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((listItem) => (
-              <TableRow key={listItem.name} hover>
-                <TableCell>
-                  <RouterLink to={`/pokemon/${pokemonIdFromUrl(listItem.url)}`}>
-                    {listItem.name}
-                  </RouterLink>
-                </TableCell>
-              </TableRow>
-            ))}
+          {pokemonData.map((listItem) => (
+            <TableRow key={listItem.name} hover>
+              <TableCell>
+                <RouterLink to={`/pokemon/${listItem.id}`}>
+                  {listItem.name}
+                </RouterLink>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
 
       <TablePagination
         component='div'
-        count={mockData.length}
+        count={count}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={() => {}}
+        onPageChange={handleChangePage}
         rowsPerPageOptions={[]}
         ActionsComponent={TablePaginationCentered}
         labelDisplayedRows={() => ''}
