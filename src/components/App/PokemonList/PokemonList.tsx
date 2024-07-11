@@ -18,11 +18,14 @@ export interface PokemonListProps {
 export interface PokemonListItem {
   name: string;
   url: string;
-
-  // ...
-  // Note: non-exhaustive interface, see here for full list of available props:
-  // https://pokeapi.co/docs/v2#pokemon-section
 }
+
+// Get the Pokemon ID that will be used for the pokemon details page
+// API request.
+// TODO: NOT IMPLEMENTED YET
+const pokemonIdFromUrl = (url: string): string => {
+  return url.split('/').pop() ?? 'UNKNOWN';
+};
 
 const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
   const mockData: PokemonListItem[] = [
@@ -65,7 +68,7 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
     }
   ];
 
-  const [page] = useState(0);
+  const [page, setPage] = useState(0);
 
   return (
     <TableContainer component={Paper}>
