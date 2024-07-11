@@ -8,7 +8,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TablePagination
+  TablePagination,
+  Skeleton
 } from '@mui/material';
 import {
   useQuery,
@@ -100,11 +101,10 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
 
   // TODO: Make better.
   // TODO: preloading shadows might be nice here instead
-  if (isFetching) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const pokemonData = data.pokemon_v2_pokemon as PokemonListItem[];
-  const { count } = data.pokemon_v2_pokemon_aggregate.aggregate;
+  const pokemonData = data?.pokemon_v2_pokemon as PokemonListItem[];
+  const { count } = data?.pokemon_v2_pokemon_aggregate?.aggregate ?? 0;
 
   return (
     <TableContainer component={Paper}>
@@ -116,21 +116,36 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
         </TableHead>
 
         <TableBody>
-          {pokemonData.map((listItem) => (
-            <TableRow key={listItem.name} hover>
-              <TableCell>
-                <RouterLink to={`/pokemon/${listItem.id}`}>
-                  {listItem.name}
-                </RouterLink>
-              </TableCell>
-            </TableRow>
-          ))}
+          {isFetching &&
+            [...Array(rowsPerPage)].map(() => (
+              <TableRow key={`placeholder${Math.floor(Math.random() * 1000)}`}>
+                <TableCell>
+                  <Skeleton
+                    sx={{
+                      margin: '16px',
+                      width: `${50 + Math.random() * 100}px`
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+
+          {!isFetching &&
+            pokemonData.map((listItem) => (
+              <TableRow key={listItem.name} hover>
+                <TableCell>
+                  <RouterLink to={`/pokemon/${listItem.id}`}>
+                    {listItem.name}
+                  </RouterLink>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
 
       <TablePagination
         component='div'
-        count={count}
+        count={count ?? 1}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
