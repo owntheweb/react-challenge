@@ -11,11 +11,7 @@ import {
   TablePagination,
   Skeleton
 } from '@mui/material';
-import {
-  useQuery,
-  keepPreviousData,
-  useQueryClient
-} from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import TablePaginationCentered from 'components/TablePaginationCentered/TablePaginationCentered';
 import axios, { AxiosResponse } from 'axios';
 import pokemonListQuery from './pokemonListQuery';
@@ -24,6 +20,7 @@ const endpoint = 'https://beta.pokeapi.co/graphql/v1beta';
 
 export interface PokemonListProps {
   rowsPerPage?: number;
+  loadSize?: number;
 }
 
 export interface PokemonAbilityEffect {
@@ -47,9 +44,8 @@ export interface PokemonListItem {
   pokemon_v2_pokemonabilities: PokemonAbility[];
 }
 
-const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
+const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
   const [page, setPage] = useState(0);
-  const queryClient = useQueryClient();
 
   // TODO: No any?
   const handleChangePage = (event: any | null, newPage: number) => {
@@ -57,11 +53,10 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
   };
 
   // TODO: Error handling
-  // TODO: incoming data types
   // Get a page of pokemon
   // I really wanted to name this, `catchPokemon`...
   const fetchPokemon = async (
-    newPage: number,
+    loadPage: number,
     limit: number,
     query: string
   ): Promise<AxiosResponse<any, any>> => {
@@ -69,7 +64,7 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
       query,
       variables: {
         limit,
-        offset: newPage * limit,
+        offset: loadPage * limit,
         orderBy: [{ id: 'asc' }]
       }
     });
@@ -77,33 +72,28 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
     return response.data;
   };
 
+  const loadPage = Math.floor((page * rowsPerPage) / loadSize);
+
   // much thanks:
   // https://tanstack.com/query/latest/docs/framework/react/examples/pagination?from=reactQueryV3
-  const { data, error, isFetching, isPlaceholderData } = useQuery({
-    queryKey: ['pokemon', page, rowsPerPage],
+  const { data, error, isFetching } = useQuery({
+    queryKey: ['pokemon', loadPage, loadSize],
     placeholderData: keepPreviousData,
     staleTime: 500000,
     queryFn: async () => {
-      const response = await fetchPokemon(page, rowsPerPage, pokemonListQuery);
+      const response = await fetchPokemon(loadPage, loadSize, pokemonListQuery);
       return response.data;
     }
   });
 
-  // Prefetch the next page!
-  React.useEffect(() => {
-    if (!isPlaceholderData && data?.hasMore) {
-      queryClient.prefetchQuery({
-        queryKey: ['pokemon', page + 1],
-        queryFn: () => fetchPokemon(page + 1, rowsPerPage, pokemonListQuery)
-      });
-    }
-  }, [data, isPlaceholderData, page, queryClient]);
-
-  // TODO: Make better.
-  // TODO: preloading shadows might be nice here instead
   if (error) return <div>Error: {error.message}</div>;
 
-  const pokemonData = data?.pokemon_v2_pokemon as PokemonListItem[];
+  // Paging math hurts my brain, thanks:
+  // https://stackoverflow.com/questions/68106002/convert-startindex-endindex-to-pagenumber-pagesize
+  const loadedPokemonData = data?.pokemon_v2_pokemon as PokemonListItem[];
+  const startIndex = (page * rowsPerPage) % loadSize;
+  const pokemonData =
+    loadedPokemonData?.slice(startIndex, startIndex + rowsPerPage) ?? [];
   const { count } = data?.pokemon_v2_pokemon_aggregate?.aggregate ?? 0;
 
   return (
