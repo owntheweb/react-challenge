@@ -19,7 +19,15 @@ const pokemonBlueTheme = createTheme({
         },
         body: {
           borderBottom: 'none',
-          fontSize: '1rem'
+          fontSize: '1rem',
+          display: 'flex',
+          padding: '0',
+          '& a': {
+            textDecoration: 'none',
+            color: '#000',
+            padding: '16px',
+            flexGrow: 1
+          }
         }
       }
     },
@@ -42,7 +50,9 @@ const pokemonBlueTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#deebfd',
-          fontSize: '1rem'
+          fontSize: '1rem',
+          display: 'flex',
+          justifyContent: 'center'
         }
       }
     }

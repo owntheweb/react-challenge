@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -22,9 +23,11 @@ export interface PokemonListItem {
 
 // Get the Pokemon ID that will be used for the pokemon details page
 // API request.
-// TODO: NOT IMPLEMENTED YET
+// TODO: Revisit as this still feels clunky, maybe just regex option
 const pokemonIdFromUrl = (url: string): string => {
-  return url.split('/').pop() ?? 'UNKNOWN';
+  // In case the API removes trailing slashes at some point:
+  const noSlashUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  return noSlashUrl.split('/').pop() ?? 'UNKNOWN';
 };
 
 const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
@@ -83,8 +86,12 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
           {mockData
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((listItem) => (
-              <TableRow key={listItem.name}>
-                <TableCell>{listItem.name}</TableCell>
+              <TableRow key={listItem.name} hover>
+                <TableCell>
+                  <RouterLink to={`/pokemon/${pokemonIdFromUrl(listItem.url)}`}>
+                    {listItem.name}
+                  </RouterLink>
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>
@@ -98,7 +105,6 @@ const PokemonList = ({ rowsPerPage = 5 }: PokemonListProps) => {
         onPageChange={() => {}}
         rowsPerPageOptions={[]}
         ActionsComponent={TablePaginationCentered}
-        sx={{ display: 'flex', justifyContent: 'center' }}
         labelDisplayedRows={() => ''}
       />
     </TableContainer>
