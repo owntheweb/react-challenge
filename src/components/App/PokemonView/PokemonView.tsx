@@ -11,6 +11,7 @@ import {
   TableRow
 } from '@mui/material';
 import BackLink from 'components/BackLink';
+import formatPokemonApiName from 'utils/formatPokemonApiName';
 
 interface PokemonAbility {
   id: number;
@@ -82,7 +83,7 @@ const PokemonView = (): React.ReactNode => {
 
   return (
     <>
-      <p>Selected Pokemon: {selectedPokemon.name}</p>
+      <p>Selected Pokemon: {formatPokemonApiName(selectedPokemon.name)}</p>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -94,7 +95,9 @@ const PokemonView = (): React.ReactNode => {
           <TableBody>
             {selectedPokemon.pokemon_v2_pokemonabilities.map((ability) => (
               <TableRow key={ability.id}>
-                <TableCell>{ability.pokemon_v2_ability.name}</TableCell>
+                <TableCell>
+                  {formatPokemonApiName(ability.pokemon_v2_ability.name)}
+                </TableCell>
                 <TableCell>
                   {ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]
                     .effect || 'Effect not found. How mysterious...'}

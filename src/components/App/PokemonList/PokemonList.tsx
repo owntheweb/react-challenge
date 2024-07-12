@@ -17,6 +17,7 @@ import TablePaginationCentered from 'components/TablePaginationCentered';
 import axios, { AxiosResponse } from 'axios';
 import pokemonListQuery from './pokemonListQuery';
 import { pokemonBlueLinkTableTheme } from '../pokemonBlueTheme';
+import formatPokemonApiName from 'utils/formatPokemonApiName';
 
 const endpoint = 'https://beta.pokeapi.co/graphql/v1beta';
 
@@ -127,7 +128,7 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
                 <TableRow key={listItem.name} hover>
                   <TableCell>
                     <RouterLink to={`/pokemon/${listItem.id}`}>
-                      {listItem.name}
+                      {formatPokemonApiName(listItem.name)}
                     </RouterLink>
                   </TableCell>
                 </TableRow>
