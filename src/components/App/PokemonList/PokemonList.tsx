@@ -13,7 +13,7 @@ import {
   ThemeProvider
 } from '@mui/material';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import TablePaginationCentered from 'components/TablePaginationCentered/TablePaginationCentered';
+import TablePaginationCentered from 'components/TablePaginationCentered';
 import axios, { AxiosResponse } from 'axios';
 import pokemonListQuery from './pokemonListQuery';
 import { pokemonBlueLinkTableTheme } from '../pokemonBlueTheme';

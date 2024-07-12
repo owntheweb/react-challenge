@@ -8,9 +8,9 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Typography
+  TableRow
 } from '@mui/material';
+import BackLink from 'components/BackLink';
 
 interface PokemonAbility {
   id: number;
@@ -104,6 +104,7 @@ const PokemonView = (): React.ReactNode => {
           </TableBody>
         </Table>
       </TableContainer>
+      <BackLink to='/' text='Back to list view' />
     </>
   );
 };
