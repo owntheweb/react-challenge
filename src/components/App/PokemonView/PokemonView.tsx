@@ -27,8 +27,10 @@ const PokemonView = (): React.ReactNode => {
           </TableHead>
 
           <TableBody>
-            <TableRow key='REPLACE' hover>
-              <TableCell>Soon</TableCell>
+            <TableRow key='REPLACE'>
+              <TableCell sx={{ display: 'table-cell', padding: '16px' }}>
+                Soon
+              </TableCell>
               <TableCell>Soon</TableCell>
             </TableRow>
           </TableBody>

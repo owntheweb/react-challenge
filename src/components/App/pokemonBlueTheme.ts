@@ -1,5 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
+// main theme for the pokemon light blue table theme
 const pokemonBlueTheme = createTheme({
   components: {
     MuiTableContainer: {
@@ -20,14 +21,7 @@ const pokemonBlueTheme = createTheme({
         body: {
           borderBottom: 'none',
           fontSize: '1rem',
-          display: 'flex',
-          padding: '0',
-          '& a': {
-            textDecoration: 'none',
-            color: '#000',
-            padding: '16px',
-            flexGrow: 1
-          }
+          display: 'flex'
         }
       }
     },
@@ -59,4 +53,24 @@ const pokemonBlueTheme = createTheme({
   }
 });
 
-export default pokemonBlueTheme;
+// Sub-theme used for the link table that needs padding removed
+// with link styles applied
+const pokemonBlueLinkTableTheme = createTheme(pokemonBlueTheme, {
+  components: {
+    MuiTableCell: {
+      styleOverrides: {
+        body: {
+          padding: '0',
+          '& a': {
+            textDecoration: 'none',
+            color: '#000',
+            padding: '16px',
+            flexGrow: 1
+          }
+        }
+      }
+    }
+  }
+});
+
+export { pokemonBlueTheme, pokemonBlueLinkTableTheme };
