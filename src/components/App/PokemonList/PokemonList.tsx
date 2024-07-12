@@ -79,24 +79,21 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
   // much thanks:
   // https://tanstack.com/query/latest/docs/framework/react/examples/pagination?from=reactQueryV3
   const { data, error, isFetching } = useQuery({
-    queryKey: ['pokemon', loadPage, loadSize],
+    queryKey: ['pokemonList', loadPage, loadSize],
     placeholderData: keepPreviousData,
-    staleTime: 500000,
-    queryFn: async () => {
-      const response = await fetchPokemon(loadPage, loadSize, pokemonListQuery);
-      return response.data;
-    }
+    staleTime: 60 * 60 * 1000, // 1 hour
+    queryFn: () => fetchPokemon(loadPage, loadSize, pokemonListQuery)
   });
 
   if (error) return <div>Error: {error.message}</div>;
 
   // Paging math hurts my brain, thanks:
   // https://stackoverflow.com/questions/68106002/convert-startindex-endindex-to-pagenumber-pagesize
-  const loadedPokemonData = data?.pokemon_v2_pokemon as PokemonListItem[];
+  const loadedPokemonData = data?.data?.pokemon_v2_pokemon as PokemonListItem[];
   const startIndex = (page * rowsPerPage) % loadSize;
   const pokemonData =
     loadedPokemonData?.slice(startIndex, startIndex + rowsPerPage) ?? [];
-  const { count } = data?.pokemon_v2_pokemon_aggregate?.aggregate ?? 0;
+  const { count } = data?.data?.pokemon_v2_pokemon_aggregate?.aggregate ?? 0;
 
   return (
     <ThemeProvider theme={pokemonBlueLinkTableTheme}>

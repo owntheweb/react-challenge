@@ -20,8 +20,7 @@ const pokemonBlueTheme = createTheme({
         },
         body: {
           borderBottom: 'none',
-          fontSize: '1rem',
-          display: 'flex'
+          fontSize: '1rem'
         }
       }
     },
@@ -33,9 +32,6 @@ const pokemonBlueTheme = createTheme({
           },
           '&:nth-of-type(even)': {
             backgroundColor: '#ffffff'
-          },
-          '&:hover': {
-            backgroundColor: '#adcdf7'
           }
         }
       }
@@ -61,6 +57,7 @@ const pokemonBlueLinkTableTheme = createTheme(pokemonBlueTheme, {
       styleOverrides: {
         body: {
           padding: '0',
+          display: 'flex',
           '& a': {
             textDecoration: 'none',
             color: '#000',
