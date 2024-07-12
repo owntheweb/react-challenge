@@ -15,9 +15,9 @@ import {
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import TablePaginationCentered from 'components/TablePaginationCentered';
 import axios, { AxiosResponse } from 'axios';
+import formatPokemonApiName from 'utils/formatPokemonApiName';
 import pokemonListQuery from './pokemonListQuery';
 import { pokemonBlueLinkTableTheme } from '../pokemonBlueTheme';
-import formatPokemonApiName from 'utils/formatPokemonApiName';
 
 const endpoint = 'https://beta.pokeapi.co/graphql/v1beta';
 
