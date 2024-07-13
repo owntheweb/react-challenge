@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import config from 'components/config';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Table,
@@ -18,33 +19,11 @@ import axios, { AxiosResponse } from 'axios';
 import formatPokemonApiName from 'utils/formatPokemonApiName';
 import pokemonListQuery from './pokemonListQuery';
 import { pokemonBlueLinkTableTheme } from '../pokemonBlueTheme';
-
-const endpoint = 'https://beta.pokeapi.co/graphql/v1beta';
+import { PokemonListItem } from './model/PokemonQueryData';
 
 export interface PokemonListProps {
   rowsPerPage?: number;
   loadSize?: number;
-}
-
-export interface PokemonAbilityEffect {
-  language_id: number;
-  effect: string;
-}
-
-// TODO: Maybe there's a way to flatten this in the query itself?
-export interface PokemonAbility {
-  id: number;
-  pokemon_v2_ability: {
-    name: string;
-  };
-}
-
-// TODO: I wonder if I can rename properties in graphql query?
-// pokemon_v2_pokemonabilities -> abilities
-export interface PokemonListItem {
-  id: number;
-  name: string;
-  pokemon_v2_pokemonabilities: PokemonAbility[];
 }
 
 const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
@@ -63,7 +42,7 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
     limit: number,
     query: string
   ): Promise<AxiosResponse<any, any>> => {
-    const response = await axios.post(endpoint, {
+    const response = await axios.post(config.apiEndpoint, {
       query,
       variables: {
         limit,

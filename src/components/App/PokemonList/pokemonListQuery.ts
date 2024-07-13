@@ -1,5 +1,5 @@
 const pokemonListQuery = `
-query samplePokeAPIquery(
+query pokemonListQuery(
   $limit: Int
   $offset: Int
   $orderBy: [pokemon_v2_pokemon_order_by!]

@@ -17,7 +17,7 @@ const BackBox = styled(Box)<BoxProps>(() => ({
 
 // Style the back button
 const BackButton = styled(Button)<ButtonLinkProps>(() => ({
-  color: '#549AF6',
+  color: '#559BF6',
   textTransform: 'none',
   padding: 0,
   fontSize: '1rem',
