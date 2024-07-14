@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import {
   Paper,
@@ -45,6 +45,9 @@ interface PokemonAxiosResponseData {
 const PokemonView = (): React.ReactNode => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  // return to the page of listed items being viewed before this page
+  const listPage = location.state?.page;
 
   // When cache data is not available, fetch a pokemon
   const fetchSinglePokemon = async (pokemonId: number): Promise<Pokemon> => {
@@ -159,7 +162,7 @@ const PokemonView = (): React.ReactNode => {
           </TableBody>
         </Table>
       </TableContainer>
-      <BackLink to='/' text='Back to list view' />
+      <BackLink to='/' text='Back to list view' state={{ page: listPage }} />
     </>
   );
 };

@@ -28,15 +28,15 @@ const BackButton = styled(Button)<ButtonLinkProps>(() => ({
   }
 }));
 
-interface BackLinkProps {
+interface BackLinkProps extends RouterLinkProps {
   to: string;
   text?: string;
 }
 
-const BackLink: React.FC<BackLinkProps> = ({ to, text = 'Back' }) => {
+const BackLink: React.FC<BackLinkProps> = ({ to, text = 'Back', state }) => {
   return (
     <BackBox>
-      <BackButton variant='text' component={RouterLink} to={to}>
+      <BackButton variant='text' component={RouterLink} to={to} state={state}>
         {text}
       </BackButton>
     </BackBox>

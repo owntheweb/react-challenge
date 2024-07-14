@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from 'components/config';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -27,7 +27,18 @@ export interface PokemonListProps {
 }
 
 const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
-  const [page, setPage] = useState(0);
+  const location = useLocation();
+  const [page, setPage] = useState(() => {
+    const savedPage = location.state?.page;
+    return savedPage !== undefined ? savedPage : 0;
+  });
+
+  useEffect(() => {
+    // Clear the page from location state after it has been used
+    if (location.state?.page !== undefined) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // TODO: No any?
   const handleChangePage = (event: any | null, newPage: number) => {
@@ -106,7 +117,7 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
               pokemonData.map((listItem) => (
                 <TableRow key={listItem.name} hover>
                   <TableCell>
-                    <RouterLink to={`/pokemon/${listItem.id}`}>
+                    <RouterLink to={`/pokemon/${listItem.id}`} state={{ page }}>
                       {formatPokemonApiName(listItem.name)}
                     </RouterLink>
                   </TableCell>
