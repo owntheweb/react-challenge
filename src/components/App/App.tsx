@@ -9,7 +9,16 @@ import PokemonList from './PokemonList/PokemonList';
 import { pokemonBlueTheme } from './pokemonBlueTheme';
 import PokemonView from './PokemonList/PokemonView/PokemonView';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Treat pokeapi.co API as nice as possible. They want max
+      // 100 requests per hour. This will help if things are wonky
+      // and offer faster UI feedback with that.
+      retry: false
+    }
+  }
+});
 
 const App = (): React.ReactNode => {
   return (
