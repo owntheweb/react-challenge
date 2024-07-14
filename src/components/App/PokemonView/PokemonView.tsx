@@ -63,7 +63,8 @@ const PokemonView = (): React.ReactNode => {
         id: ability.id,
         name: ability.pokemon_v2_ability.name,
         effect:
-          ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0].effect
+          ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]?.effect ||
+          'Effect data is not available.'
       }))
     };
   };
@@ -107,7 +108,7 @@ const PokemonView = (): React.ReactNode => {
               name: ability.pokemon_v2_ability.name,
               effect:
                 ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]
-                  .effect
+                  ?.effect || 'Effect data is not available.'
             })
           )
         };
