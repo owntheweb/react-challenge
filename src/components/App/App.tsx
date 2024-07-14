@@ -7,7 +7,7 @@ import '@fontsource/roboto/700.css';
 import { ThemeProvider } from '@emotion/react';
 import PokemonList from './PokemonList/PokemonList';
 import { pokemonBlueTheme } from './pokemonBlueTheme';
-import PokemonView from './PokemonView/PokemonView';
+import PokemonView from './PokemonList/PokemonView/PokemonView';
 
 const queryClient = new QueryClient();
 

@@ -14,33 +14,12 @@ import BackLink from 'components/BackLink';
 import formatPokemonApiName from 'utils/formatPokemonApiName';
 import config from 'components/config';
 import axios from 'axios';
-import {
-  PokemonListItem,
-  PokemonQueryData,
-  PokemonAbility as ResponsePokemonAbility
-} from '../PokemonList/model/PokemonQueryData';
+import { PokemonListItem, PokemonQueryData } from '../model/PokemonQueryData';
 import pokemonViewQuery from './pokemonViewQuery';
-
-interface PokemonAbility {
-  id: number;
-  name: string;
-  effect: string;
-}
-
-interface Pokemon {
-  name: string;
-  abilities: PokemonAbility[];
-}
-
-interface PokemonAxiosResponseData {
-  data: {
-    pokemon_v2_pokemon_by_pk: {
-      id: number;
-      name: string;
-      pokemon_v2_pokemonabilities: ResponsePokemonAbility[];
-    };
-  };
-}
+import {
+  Pokemon,
+  PokemonAxiosResponseData
+} from './model/SinglePokemonQueryData';
 
 const PokemonView = (): React.ReactNode => {
   const { id } = useParams<{ id: string }>();
