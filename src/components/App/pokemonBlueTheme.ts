@@ -43,6 +43,10 @@ const pokemonBlueTheme = createTheme({
           fontSize: '1rem',
           display: 'flex',
           justifyContent: 'center'
+        },
+        toolbar: {
+          paddingLeft: 0,
+          paddingRight: 0
         }
       }
     }

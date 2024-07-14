@@ -38,7 +38,7 @@ const TablePaginationCentered = ({
   };
 
   return (
-    <div style={{ flexShrink: 0, marginLeft: '2.5em' }}>
+    <div style={{ flexShrink: 0 }}>
       <IconButton
         onClick={handleFirstClick}
         disabled={page === 0}
