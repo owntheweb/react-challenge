@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import config from 'components/config';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import TablePaginationCentered from 'components/TablePaginationCentered';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import formatPokemonApiName from 'utils/formatPokemonApiName';
 import pokemonListQuery from './pokemonListQuery';
 import { pokemonBlueLinkTableTheme } from '../pokemonBlueTheme';
@@ -33,12 +33,6 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
     return savedPage !== undefined ? savedPage : 0;
   });
 
-  useEffect(() => {
-    // Clear the page from location state after it has been used
-    if (location.state?.page !== undefined) {
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
@@ -71,6 +65,12 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
     }
   };
 
+  // Calculate the current data load page (not the page the user sees).
+  // Example: User is viewing page 3 in the table. Data is still
+  // loading from the first loaded set of 100 results. This is saving
+  // on number of requests to the API while allowing the user to
+  // more quickly page through pokemon 5 at a time, loading the next
+  // data load page of 100 at list page 21.
   const loadPage = Math.floor((page * rowsPerPage) / loadSize);
 
   // much thanks:
