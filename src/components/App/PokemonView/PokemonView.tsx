@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import {
   Paper,
   Table,
@@ -13,7 +13,7 @@ import {
 import BackLink from 'components/BackLink';
 import formatPokemonApiName from 'utils/formatPokemonApiName';
 import config from 'components/config';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import {
   PokemonListItem,
   PokemonQueryData,
@@ -45,30 +45,61 @@ interface PokemonAxiosResponseData {
 const PokemonView = (): React.ReactNode => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(true);
-  const [pokemonData, setPokemonData] = useState<Pokemon | undefined>();
 
-  const getCachedPokemon = (): Pokemon | undefined => {
-    // get cache data for all pages
-    const cachedQueries = queryClient.getQueriesData<PokemonQueryData>({
-      queryKey: ['pokemonList']
-    });
-
-    // combine all cached pages data
-    // TODO: This feels messy. Revisit.
-    const allPokemonData = cachedQueries.reduce((acc, [, pageData]) => {
-      if (pageData && pageData.data && pageData.data.pokemon_v2_pokemon) {
-        return [...acc, ...pageData.data.pokemon_v2_pokemon];
+  // When cache data is not available, fetch a pokemon
+  const fetchSinglePokemon = async (pokemonId: number): Promise<Pokemon> => {
+    const response = await axios.post<PokemonAxiosResponseData>(
+      config.apiEndpoint,
+      {
+        query: pokemonViewQuery,
+        variables: { id: pokemonId }
       }
-      return acc;
-    }, [] as PokemonListItem[]);
-
-    const selectedPokemon = allPokemonData.find(
-      (pokemon) => pokemon.id === Number(id)
     );
 
-    return selectedPokemon
-      ? ({
+    const data = response.data.data.pokemon_v2_pokemon_by_pk;
+    return {
+      name: data.name,
+      abilities: data.pokemon_v2_pokemonabilities.map((ability) => ({
+        id: ability.id,
+        name: ability.pokemon_v2_ability.name,
+        effect:
+          ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0].effect
+      }))
+    };
+  };
+
+  // useQuery to set initial state from paged cache or fetch
+  // a single pokemon and cache that as well.
+  // Note: If this page grew while the paged data did not, I
+  // see making use of the cached paged data if available still
+  // to place a temporary page title here at least while loading the
+  // rest of the content. While I catch up on Tanstack/React
+  // Query, I'm super curious how the team would handle this! :D
+  const {
+    data: pokemonData,
+    isLoading,
+    error
+  } = useQuery<Pokemon>({
+    queryKey: ['pokemon', id],
+    queryFn: () => fetchSinglePokemon(Number(id)),
+    staleTime: 60 * 60 * 1000, // 1 hour
+    initialData: () => {
+      const cachedQueries = queryClient.getQueriesData<PokemonQueryData>({
+        queryKey: ['pokemonList']
+      });
+      const allPokemonData = cachedQueries.reduce((acc, [, pageData]) => {
+        if (pageData?.data?.pokemon_v2_pokemon) {
+          return [...acc, ...pageData.data.pokemon_v2_pokemon];
+        }
+        return acc;
+      }, [] as PokemonListItem[]);
+
+      const selectedPokemon = allPokemonData.find(
+        (pokemon) => pokemon.id === Number(id)
+      );
+
+      if (selectedPokemon) {
+        return {
           name: selectedPokemon.name,
           abilities: selectedPokemon.pokemon_v2_pokemonabilities.map(
             (ability) => ({
@@ -79,72 +110,27 @@ const PokemonView = (): React.ReactNode => {
                   .effect
             })
           )
-        } as Pokemon)
-      : undefined;
-  };
-
-  const fetchSinglePokemon = async (
-    pokemonId: number,
-    query: string
-  ): Promise<PokemonAxiosResponseData> => {
-    const response: AxiosResponse<PokemonAxiosResponseData> = await axios.post(
-      config.apiEndpoint,
-      {
-        query,
-        variables: {
-          id: pokemonId
-        }
+        };
       }
-    );
 
-    return response.data;
-  };
-
-  useEffect(() => {
-    // TODO: This assumes all is great. Add error handling
-    const fetchFreshPokemon = async () => {
-      const freshPokemonResponse = await fetchSinglePokemon(
-        Number(id),
-        pokemonViewQuery
-      );
-      const data = freshPokemonResponse.data.pokemon_v2_pokemon_by_pk;
-
-      setPokemonData({
-        name: data.name,
-        abilities: data.pokemon_v2_pokemonabilities.map((ability) => ({
-          id: ability.id,
-          name: ability.pokemon_v2_ability.name,
-          effect:
-            ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0].effect
-        }))
-      });
-      setLoading(false);
-    };
-
-    // We have all the data needed for this page in cached list data.
-    // Note: List data wont exist if visiting this page directly.
-    const cachedPokemon = getCachedPokemon();
-    if (cachedPokemon) {
-      setPokemonData(cachedPokemon);
-      setLoading(false);
-      return;
+      return undefined;
     }
+  });
 
-    // No cached data, load a fresh pokemon
-    // TODO: Cache single pokemon as well with tanstack query?
-    fetchFreshPokemon();
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return <p>Loading...</p>;
   }
 
-  if (!loading && !pokemonData) {
+  if (!isLoading && !pokemonData) {
     return (
       <p>
         This mysterious pokemon could not be found. The adventure continues...
       </p>
     );
+  }
+
+  if (error) {
+    return <p>Error: {error.message}</p>;
   }
 
   if (!pokemonData) {
