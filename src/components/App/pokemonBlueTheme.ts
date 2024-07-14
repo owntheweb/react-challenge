@@ -46,7 +46,12 @@ const pokemonBlueTheme = createTheme({
         },
         toolbar: {
           paddingLeft: 0,
-          paddingRight: 0
+          paddingRight: 0,
+          // TODO: Help! This part doesn't smell right. I'm not sure how to proceed. Let's discuss:
+          '@media (min-width:600px)': {
+            paddingLeft: '0 !important',
+            paddingRight: '0 !important'
+          }
         }
       }
     }
