@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from 'components/config';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
@@ -32,6 +32,14 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
     const savedPage = location.state?.page;
     return savedPage !== undefined ? savedPage : 0;
   });
+
+  // On initial page load, clear active page from any previous
+  // session to prevent paging oddness.
+  useEffect(() => {
+    if (location.state?.page !== undefined) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
