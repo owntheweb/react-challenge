@@ -39,30 +39,36 @@ const PokemonList = ({ rowsPerPage = 5, loadSize = 100 }: PokemonListProps) => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
-  // TODO: No any?
-  const handleChangePage = (event: any | null, newPage: number) => {
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
     setPage(newPage);
   };
 
-  // TODO: Error handling
   // Get a page of pokemon
   // I really wanted to name this, `catchPokemon`...
   const fetchPokemon = async (
     loadPage: number,
     limit: number,
     query: string
-  ): Promise<AxiosResponse<any, any>> => {
-    const response = await axios.post(config.apiEndpoint, {
-      query,
-      variables: {
-        limit,
-        offset: loadPage * limit,
-        orderBy: [{ id: 'asc' }]
+  ) => {
+    try {
+      const response = await axios.post(config.apiEndpoint, {
+        query,
+        variables: {
+          limit,
+          offset: loadPage * limit,
+          orderBy: [{ id: 'asc' }]
+        }
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`API Error: ${error.message}`);
       }
-    });
-
-    return response.data;
+      throw new Error('Unexpected fetchPokemon error. Tell an adult!');
+    }
   };
 
   const loadPage = Math.floor((page * rowsPerPage) / loadSize);

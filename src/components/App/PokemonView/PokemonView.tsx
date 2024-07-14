@@ -51,25 +51,32 @@ const PokemonView = (): React.ReactNode => {
 
   // When cache data is not available, fetch a pokemon
   const fetchSinglePokemon = async (pokemonId: number): Promise<Pokemon> => {
-    const response = await axios.post<PokemonAxiosResponseData>(
-      config.apiEndpoint,
-      {
-        query: pokemonViewQuery,
-        variables: { id: pokemonId }
-      }
-    );
+    try {
+      const response = await axios.post<PokemonAxiosResponseData>(
+        config.apiEndpoint,
+        {
+          query: pokemonViewQuery,
+          variables: { id: pokemonId }
+        }
+      );
 
-    const data = response.data.data.pokemon_v2_pokemon_by_pk;
-    return {
-      name: data.name,
-      abilities: data.pokemon_v2_pokemonabilities.map((ability) => ({
-        id: ability.id,
-        name: ability.pokemon_v2_ability.name,
-        effect:
-          ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]?.effect ||
-          'Effect data is not available.'
-      }))
-    };
+      const data = response.data.data.pokemon_v2_pokemon_by_pk;
+      return {
+        name: data.name,
+        abilities: data.pokemon_v2_pokemonabilities.map((ability) => ({
+          id: ability.id,
+          name: ability.pokemon_v2_ability.name,
+          effect:
+            ability.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]
+              ?.effect || 'Effect data is not available.'
+        }))
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(`API Error: ${error.message}`);
+      }
+      throw new Error('Unexpected fetchSinglePokemon error. Tell an adult!');
+    }
   };
 
   // useQuery to set initial state from paged cache or fetch
